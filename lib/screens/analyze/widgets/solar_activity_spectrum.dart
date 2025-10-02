@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/chart_card.dart';
+import 'package:nasa_project/screens/analyze/widgets/chart_card.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SolarActivitySpectrum extends StatelessWidget {
@@ -62,7 +62,7 @@ class SolarActivitySpectrum extends StatelessWidget {
                   yValueMapper: (SolarData solar, _) => solar.value,
                   borderRadius: BorderRadius.circular(8),
                   color: Color(0xff4ECDC4),
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
+                  dataLabelSettings: DataLabelSettings(isVisible: false),
                 ),
               ],
             ),

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/Header_cosmic_weather.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/cosmic_activity_summary.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/cosmic_time_line.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/impacr_assessment.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/live_indicator.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/magnetic_storm.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/risk_meter.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/solar_activity_spectrum.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/summary_card.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/visualizations_section.dart';
+import 'package:nasa_project/screens/analyze/widgets/Header_cosmic_weather.dart';
+import 'package:nasa_project/screens/analyze/widgets/cosmic_activity_summary.dart';
+import 'package:nasa_project/screens/analyze/widgets/cosmic_time_line.dart';
+import 'package:nasa_project/screens/analyze/widgets/impacr_assessment.dart';
+import 'package:nasa_project/screens/analyze/widgets/live_indicator.dart';
+import 'package:nasa_project/screens/analyze/widgets/magnetic_storm.dart';
+import 'package:nasa_project/screens/analyze/widgets/risk_meter.dart';
+import 'package:nasa_project/screens/analyze/widgets/solar_activity_spectrum.dart';
+import 'package:nasa_project/screens/analyze/widgets/summary_card.dart';
+import 'package:nasa_project/screens/analyze/widgets/visualizations_section.dart';
 import 'package:nasa_project/widgets/stairs_widget.dart';
 
-class CosmicWeatherScreen extends StatelessWidget {
-  const CosmicWeatherScreen({super.key});
+class AnalyzeScreen extends StatelessWidget {
+  const AnalyzeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class CosmicWeatherScreen extends StatelessWidget {
             children: [
               Positioned.fill(child: CustomPaint(painter: StarPainter())),
               SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
+                // physics: BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

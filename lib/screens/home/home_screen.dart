@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/cosmic_weather_view.dart';
+import 'package:nasa_project/screens/about/about_us_screen.dart';
+import 'package:nasa_project/screens/analyze/analyze_screen.dart';
 import 'package:nasa_project/screens/game/game_screen.dart';
+import 'package:nasa_project/widgets/stairs_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -14,6 +16,7 @@ class HomeScreen extends StatelessWidget {
           height: MediaQuery.sizeOf(context).height,
           child: Stack(
             children: [
+              Positioned.fill(child: CustomPaint(painter: StarPainter())),
               Positioned.fill(child: Image.asset("assets/images/sun.jpg")),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -72,7 +75,7 @@ class CustomButtons extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CosmicWeatherScreen()),
+                  MaterialPageRoute(builder: (_) => AnalyzeScreen()),
                 );
               },
               child: Container(
@@ -92,7 +95,12 @@ class CustomButtons extends StatelessWidget {
         Column(
           children: [
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AboutUsScreen()),
+                );
+              },
               child: Container(
                 height: 64,
                 width: 64,
@@ -104,7 +112,7 @@ class CustomButtons extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
-            Text("about", style: TextStyle(color: Colors.white)),
+            Text("about", style: TextStyle(color: Colors.white),),
           ],
         ),
       ],

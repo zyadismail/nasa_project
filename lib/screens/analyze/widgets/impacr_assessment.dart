@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/cosmic_weather_view.dart';
+import 'package:nasa_project/screens/analyze/analyze_screen.dart';
 
 class ImpactAssessmentContainer extends StatelessWidget {
   final List<ImpactData> impacts = [

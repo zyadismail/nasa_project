@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:nasa_project/screens/cosmic_weather_view/widgets/chart_card.dart';
+import 'package:nasa_project/screens/analyze/widgets/chart_card.dart';
 
 class VisualizationsSection extends StatelessWidget {
   const VisualizationsSection({super.key});

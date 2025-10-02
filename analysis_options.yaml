@@ -11,6 +11,10 @@ analyzer:
   errors:
     deprecated_member_use: ignore
     library_private_types_in_public_api: ignore
+    non_constant_identifier_names: ignore
+    prefer_collection_literals: ignore
+    unnecessary_new: ignore
+    unnecessary_this: ignore
     use_key_in_widget_constructors: ignore
 include: package:flutter_lints/flutter.yaml
 

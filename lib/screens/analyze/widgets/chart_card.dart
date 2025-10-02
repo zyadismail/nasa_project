@@ -62,7 +62,7 @@ class ChartCard extends StatelessWidget {
                 dataSource: data,
                 xValueMapper: (SolarData solar, _) => solar.classType,
                 yValueMapper: (SolarData solar, _) => solar.value,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(5),
                 color: Color(0xff4ECDC4),
                 dataLabelSettings: DataLabelSettings(isVisible: false),
               ),
