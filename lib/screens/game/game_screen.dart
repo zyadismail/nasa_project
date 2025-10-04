@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SolarFlare {
   final String flareClass;
@@ -32,16 +34,16 @@ class DefenseStrategy {
   });
 }
 
-class SolarDefenderGame extends StatefulWidget {
-  const SolarDefenderGame({super.key});
+class GameScreen extends StatefulWidget {
+  const GameScreen({super.key});
 
   @override
-  _SolarDefenderGameState createState() => _SolarDefenderGameState();
+  _GameScreenState createState() => _GameScreenState();
 }
 
-class _SolarDefenderGameState extends State<SolarDefenderGame>
+class _GameScreenState extends State<GameScreen>
     with TickerProviderStateMixin {
-  String gameState = 'welcome'; // welcome, playing, gameover
+  String gameState = 'welcome'; // welcome, playing, fact, gameover
   String playerName = '';
   int score = 15;
   int phase = 0;
@@ -52,43 +54,26 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
   int countdown = 3;
   String message = '';
   bool showStats = false;
+  String currentFact = '';
+  String errorMessage = ''; // New: For showing API errors
 
   late AnimationController _pulseController;
   late AnimationController _rotateController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _rotateAnimation;
 
-  final List<SolarFlare> solarFlares = [
-    SolarFlare(
-      flareClass: 'C1.5',
-      intensity: 1.5,
-      impact: 'Minor disruptions expected',
-      damage: 5,
-    ),
-    SolarFlare(
-      flareClass: 'M2.1',
-      intensity: 2.1,
-      impact: 'Possible power grid fluctuations!',
-      damage: 15,
-    ),
-    SolarFlare(
-      flareClass: 'X1.3',
-      intensity: 1.3,
-      impact: 'Critical infrastructure at risk!',
-      damage: 30,
-    ),
-    SolarFlare(
-      flareClass: 'B3.2',
-      intensity: 3.2,
-      impact: 'Minimal impact expected',
-      damage: 3,
-    ),
-    SolarFlare(
-      flareClass: 'M5.5',
-      intensity: 5.5,
-      impact: 'Severe satellite interference!',
-      damage: 20,
-    ),
+  List<SolarFlare> solarFlares = [];
+  final List<String> educationalFacts = [
+    '☀ The Sun is a huge ball of hot plasma, and solar flares are giant explosions on its surface!',
+    '🛰 Solar flares can disrupt satellites, causing problems with GPS and TV signals.',
+    '⚡ Strong flares might cause power outages by affecting electrical grids on Earth.',
+    '📡 Communications like radio and phone signals can be interrupted during solar storms.',
+    '🌍 NASA and scientists monitor the Sun 24/7 to warn us about solar flares.',
+    '🌞 The Sun\'s magnetic field twists and snaps, releasing energy as flares.',
+    '💥 X-class flares are the strongest and can cause global blackouts if directed at Earth.',
+    '🕒 Solar flares travel at the speed of light, reaching Earth in about 8 minutes.',
+    '🌈 Auroras (Northern Lights) are sometimes caused by particles from solar flares.',
+    '🔭 The GOES satellites measure X-rays from flares to classify them as B, C, M, or X.',
   ];
 
   final List<DefenseStrategy> defenseStrategies = [
@@ -125,6 +110,8 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
   @override
   void initState() {
     super.initState();
+    fetchSolarFlares(); // Fetch real-time data
+
     _pulseController = AnimationController(
       duration: Duration(seconds: 2),
       vsync: this,
@@ -143,6 +130,126 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
       begin: 0,
       end: 2 * pi,
     ).animate(CurvedAnimation(parent: _rotateController, curve: Curves.linear));
+  }
+
+  Future<void> fetchSolarFlares() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse(
+              'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json',
+            ),
+          )
+          .timeout(
+            Duration(seconds: 10),
+            onTimeout: () {
+              // Handle timeout
+              return http.Response('Timeout', 408);
+            },
+          );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        List<SolarFlare> fetchedFlares = [];
+        for (var item in data) {
+          String flareClass = item['max_class'] ?? 'C1.0';
+          double intensity = double.tryParse(flareClass.substring(1)) ?? 1.0;
+          String impact = getImpact(flareClass[0]);
+          int damage = getDamage(flareClass[0], intensity);
+          fetchedFlares.add(
+            SolarFlare(
+              flareClass: flareClass,
+              intensity: intensity,
+              impact: impact,
+              damage: damage,
+            ),
+          );
+        }
+        // Take the last 5 flares or shuffle for variety
+        fetchedFlares = fetchedFlares.reversed.take(5).toList();
+        if (fetchedFlares.isEmpty) {
+          fetchedFlares = _getDefaultFlares(); // Fallback
+        }
+        setState(() {
+          solarFlares = fetchedFlares;
+          errorMessage = '';
+        });
+      } else {
+        setState(() {
+          solarFlares = _getDefaultFlares();
+          errorMessage = 'Failed to load real-time data. Using default flares.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        solarFlares = _getDefaultFlares();
+        errorMessage = 'Error loading data: $e. Using default flares.';
+      });
+    }
+  }
+
+  List<SolarFlare> _getDefaultFlares() {
+    return [
+      SolarFlare(
+        flareClass: 'C1.5',
+        intensity: 1.5,
+        impact: 'Minor disruptions expected',
+        damage: 5,
+      ),
+      SolarFlare(
+        flareClass: 'M2.1',
+        intensity: 2.1,
+        impact: 'Possible power grid fluctuations!',
+        damage: 15,
+      ),
+      SolarFlare(
+        flareClass: 'X1.3',
+        intensity: 1.3,
+        impact: 'Critical infrastructure at risk!',
+        damage: 30,
+      ),
+      SolarFlare(
+        flareClass: 'B3.2',
+        intensity: 3.2,
+        impact: 'Minimal impact expected',
+        damage: 3,
+      ),
+      SolarFlare(
+        flareClass: 'M5.5',
+        intensity: 5.5,
+        impact: 'Severe satellite interference!',
+        damage: 20,
+      ),
+    ];
+  }
+
+  String getImpact(String classLetter) {
+    switch (classLetter) {
+      case 'B':
+        return 'Minimal impact expected';
+      case 'C':
+        return 'Minor disruptions expected';
+      case 'M':
+        return 'Possible power grid fluctuations!';
+      case 'X':
+        return 'Critical infrastructure at risk!';
+      default:
+        return 'Unknown impact';
+    }
+  }
+
+  int getDamage(String classLetter, double intensity) {
+    switch (classLetter) {
+      case 'B':
+        return 3;
+      case 'C':
+        return (5 + intensity).toInt();
+      case 'M':
+        return (15 + intensity * 2).toInt();
+      case 'X':
+        return (30 + intensity * 3).toInt();
+      default:
+        return 10;
+    }
   }
 
   @override
@@ -190,29 +297,38 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
     final flare = solarFlares[phase];
     final damage = flare.damage.toDouble();
 
+    // Apply damage first
+    double tempPowerGrid = powerGrid - damage;
+    double tempSatellites = satellites - damage;
+    double tempCommunications = communications - damage;
+
     setState(() {
       if (strategy.protects == 'all') {
-        powerGrid = min(100, powerGrid + 10);
-        satellites = min(100, satellites + 10);
-        communications = min(100, communications + 10);
+        // Full protection: minimal damage and boost
+        powerGrid = min(100, (powerGrid - damage * 0.2) + 10);
+        satellites = min(100, (satellites - damage * 0.2) + 10);
+        communications = min(100, (communications - damage * 0.2) + 10);
         newScore += 25;
         message = '✅ Successful defense! Full Earth protection!';
       } else if (strategy.protects == 'satellites') {
-        satellites = max(0, satellites - (damage * 0.3));
-        powerGrid = max(0, powerGrid - damage);
-        communications = max(0, communications - damage);
+        satellites = max(
+          0,
+          tempSatellites + damage * 0.7,
+        ); // Reduce damage by 70%
+        powerGrid = max(0, tempPowerGrid);
+        communications = max(0, tempCommunications);
         newScore += 15;
         message = '🛡 Satellites protected!';
       } else if (strategy.protects == 'powerGrid') {
-        powerGrid = max(0, powerGrid - (damage * 0.3));
-        satellites = max(0, satellites - damage);
-        communications = max(0, communications - damage);
+        powerGrid = max(0, tempPowerGrid + damage * 0.7);
+        satellites = max(0, tempSatellites);
+        communications = max(0, tempCommunications);
         newScore += 20;
         message = '⚡ Power grid protected!';
       } else if (strategy.protects == 'communications') {
-        communications = max(0, communications - (damage * 0.3));
-        powerGrid = max(0, powerGrid - damage);
-        satellites = max(0, satellites - damage);
+        communications = max(0, tempCommunications + damage * 0.7);
+        powerGrid = max(0, tempPowerGrid);
+        satellites = max(0, tempSatellites);
         newScore += 12;
         message = '📡 Communications boosted!';
       }
@@ -224,11 +340,26 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
     Timer(Duration(seconds: 2), () {
       setState(() {
         message = '';
-        phase++;
-        if (phase >= solarFlares.length || earthHealth <= 0) {
+        if (earthHealth <= 0) {
           gameState = 'gameover';
+        } else {
+          // Show fact before next phase
+          currentFact =
+              educationalFacts[Random().nextInt(educationalFacts.length)];
+          gameState = 'fact';
         }
       });
+    });
+  }
+
+  void proceedToNextPhase() {
+    setState(() {
+      phase++;
+      if (phase >= solarFlares.length) {
+        gameState = 'gameover';
+      } else {
+        gameState = 'playing';
+      }
     });
   }
 
@@ -250,19 +381,22 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF1a1a2e), Color(0xFF16213e), Color(0xFF0f3460)],
+            colors: [Color(0xFF0C0F1C), Color(0xFF1A1F36)],
           ),
         ),
         child: SafeArea(
-          child: gameState == 'welcome'
-              ? buildWelcomeScreen()
-              : gameState == 'playing'
-              ? buildGameScreen()
-              : buildGameOverScreen(),
+          child:
+              gameState == 'welcome'
+                  ? buildWelcomeScreen()
+                  : gameState == 'playing'
+                  ? buildGameScreen()
+                  : gameState == 'fact'
+                  ? buildFactScreen()
+                  : buildGameOverScreen(),
         ),
       ),
     );
@@ -285,9 +419,10 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
                       Text('🌍', style: TextStyle(fontSize: 100)),
                       SizedBox(height: 20),
                       ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [Colors.cyan, Colors.purple],
-                        ).createShader(bounds),
+                        shaderCallback:
+                            (bounds) => LinearGradient(
+                              colors: [Colors.cyan, Colors.purple],
+                            ).createShader(bounds),
                         child: Text(
                           'Solar Defender',
                           style: TextStyle(
@@ -399,6 +534,24 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
   }
 
   Widget buildGameScreen() {
+    if (solarFlares.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            if (errorMessage.isNotEmpty) ...[
+              SizedBox(height: 20),
+              Text(
+                errorMessage,
+                style: TextStyle(color: Colors.redAccent, fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
+        ),
+      );
+    }
     final currentFlare = solarFlares[phase];
     return SingleChildScrollView(
       padding: EdgeInsets.all(20),
@@ -426,7 +579,7 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
                 ],
               ),
               Text(
-                'Phase ${phase + 1}/5',
+                'Phase ${phase + 1}/${solarFlares.length}',
                 style: TextStyle(fontSize: 20, color: Colors.white),
               ),
             ],
@@ -560,6 +713,57 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
     );
   }
 
+  Widget buildFactScreen() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '📚 Fun Fact!',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.cyanAccent,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 30),
+            Container(
+              padding: EdgeInsets.all(30),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.purpleAccent, width: 2),
+              ),
+              child: Text(
+                currentFact,
+                style: TextStyle(fontSize: 20, color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: proceedToNextPhase,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.greenAccent,
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                'Continue to Next Phase',
+                style: TextStyle(fontSize: 20, color: Colors.black),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget buildSystemStatus(String label, double value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,10 +868,7 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
                   ),
                   SizedBox(height: 15),
                   Text(
-                    '☀ Solar flares travel at the speed of light!\n\n'
-                    '🛰 They can disrupt satellites and communications\n\n'
-                    '⚡ May affect power grids on Earth\n\n'
-                    '🌍 NASA monitors space weather to protect us',
+                    educationalFacts.join('\n\n'),
                     style: TextStyle(fontSize: 16, color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
@@ -688,6 +889,8 @@ class _SolarDefenderGameState extends State<SolarDefenderGame>
                   communications = 100;
                   countdown = 3;
                   message = '';
+                  errorMessage = '';
+                  fetchSolarFlares(); // Refetch for new game
                 });
               },
               style: ElevatedButton.styleFrom(

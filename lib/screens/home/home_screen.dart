@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nasa_project/screens/about/about_us_screen.dart';
 import 'package:nasa_project/screens/analyze/analyze_screen.dart';
 import 'package:nasa_project/screens/game/game_screen.dart';
+import 'package:nasa_project/screens/video/video_screen.dart';
 import 'package:nasa_project/widgets/stairs_widget.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -27,6 +28,26 @@ class HomeScreen extends StatelessWidget {
                     HomeContent(),
                     SizedBox(height: 400),
                     CustomButtons(),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => VideoPlayerScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Learn more",
+                        style: TextStyle(
+                          color: Color(0xff00FFFF),
+                          fontSize: 17,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Image.asset("assets/images/app_logo.png"),
                   ],
                 ),
               ),
@@ -52,7 +73,7 @@ class CustomButtons extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => SolarDefenderGame()),
+                  MaterialPageRoute(builder: (_) => GameScreen()),
                 );
               },
               child: Container(
@@ -75,7 +96,7 @@ class CustomButtons extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => AnalyzeScreen()),
+                  MaterialPageRoute(builder: (_) => AboutUsScreen()),
                 );
               },
               child: Container(
@@ -85,11 +106,11 @@ class CustomButtons extends StatelessWidget {
                   color: Color(0xff45B7D1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.asset("assets/images/analyze.png"),
+                child: Image.asset("assets/images/about.png"),
               ),
             ),
             SizedBox(height: 10),
-            Text("analyze", style: TextStyle(color: Colors.white)),
+            Text("about", style: TextStyle(color: Colors.white)),
           ],
         ),
         Column(
@@ -98,7 +119,7 @@ class CustomButtons extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => AboutUsScreen()),
+                  MaterialPageRoute(builder: (_) => AnalyzeScreen()),
                 );
               },
               child: Container(
@@ -108,11 +129,11 @@ class CustomButtons extends StatelessWidget {
                   color: Color(0xff4ECDC4),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.asset("assets/images/about.png"),
+                child: Image.asset("assets/images/analyze.png"),
               ),
             ),
             SizedBox(height: 10),
-            Text("about", style: TextStyle(color: Colors.white),),
+            Text("analyze", style: TextStyle(color: Colors.white)),
           ],
         ),
       ],

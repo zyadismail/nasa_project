@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nasa_project/cubit/cubit/solar_flares_cubit.dart';
+import 'package:nasa_project/cubit/analyze/solar_flares_cubit.dart';
 
 class CosmicActivitySummary extends StatelessWidget {
   const CosmicActivitySummary({super.key});
